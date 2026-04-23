@@ -1,13 +1,25 @@
-package clinica.com.example.clinicaocupacional;
+package clinica.com.example.clinicaocupacional.Service;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.util.List;
 
-@SpringBootApplication
-public class ClinicaocupacionalApplication {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-	public static void main(String[] args) {
-		SpringApplication.run(ClinicaocupacionalApplication.class, args);
-	}
+import clinica.com.example.clinicaocupacional.Model.Paciente;
+import clinica.com.example.clinicaocupacional.Repository.PacienteRepository;
+
+@Service
+public class PacienteService {
+    @Autowired
+
+    private PacienteRepository pacienteRepository;
+
+    public List<Paciente> obtenerTodos(){
+        return pacienteRepository.findAll();
+    }
+
+    public Paciente guardar(Paciente paciente){
+        return pacienteRepository.save(paciente);
+    }
 
 }
