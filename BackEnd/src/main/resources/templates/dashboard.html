@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Clínica Ocupacional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+        .sidebar { min-height: 100vh; background: #212529; color: white; }
+        .nav-link { color: rgba(255,255,255,.75); transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #fff; background: #343a40; border-radius: 8px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-primary { background-color: #0d6efd; border: none; border-radius: 8px; padding: 10px 20px; }
+        .table-responsive { border-radius: 12px; }
+        .filter-section { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .search-icon { cursor: pointer; color: #0d6efd; }
+        .badge { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+        .badge-success { background-color: #198754; }
+        .badge-warning { background-color: #ffc107; color: #000; }
+        .badge-danger { background-color: #dc3545; }
+        th { background-color: #f8f9fa; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
+            <div class="d-flex align-items-center mb-4 px-2">
+                <i class="bi bi-hospital fs-3 me-2 text-primary"></i>
+                <span class="fs-5 fw-bold">Clínica Vial</span>
+            </div>
+            <ul class="nav flex-column gap-2">
+                <li class="nav-item"><a class="nav-link active" href="/pacientes/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/pacientes/registro"><i class="bi bi-person-plus me-2"></i> Registro</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-medical me-2"></i> Atenciones</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-bar-graph me-2"></i> Reportes</a></li>
+            </ul>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Dashboard de Pacientes</h1>
+                <a href="/pacientes/registro" class="btn btn-primary"><i class="bi bi-person-plus me-2"></i> Nuevo Paciente</a>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-section">
+                <h5 class="mb-3"><i class="bi bi-funnel me-2"></i> Filtros</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Empresa</label>
+                        <select class="form-select" id="filtroEmpresa">
+                            <option value="">Todas las empresas</option>
+                            <option value="Constructora Norte">Constructora Norte</option>
+                            <option value="Transportes Chiclayo">Transportes Chiclayo</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Estado</label>
+                        <select class="form-select" id="filtroEstado">
+                            <option value="">Todos los estados</option>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                            <option value="Suspendido">Suspendido</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Buscar por DNI</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="buscarDNI" placeholder="Ingrese DNI..." maxlength="8" pattern="\d{8}">
+                            <button class="btn btn-outline-secondary" type="button" id="btnBuscar">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensajes Flash -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Tabla de Pacientes -->
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">DNI</th>
+                                <th style="width: 25%;">Nombres y Apellidos</th>
+                                <th style="width: 20%;">Empresa</th>
+                                <th style="width: 15%;">Tipo Examen</th>
+                                <th style="width: 15%;">Estado</th>
+                                <th style="width: 15%;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaPacientes">
+                            <tr th:each="paciente : ${pacientes}">
+                                <td><strong th:text="${paciente.dni}"></strong></td>
+                                <td th:text="${paciente.nombres} + ' ' + ${paciente.apellidos}"></td>
+                                <td th:text="${paciente.empresa}"></td>
+                                <td th:text="${paciente.tipoExamen}"></td>
+                                <td>
+                                    <span th:class="${'badge ' + (#strings.equals(paciente.estado, 'Activo') ? 'badge-success' : #strings.equals(paciente.estado, 'Inactivo') ? 'badge-warning' : 'badge-danger')}" 
+                                          th:text="${paciente.estado}"></span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" title="Ver detalles" data-bs-toggle="tooltip">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" title="Editar" data-bs-toggle="tooltip">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" title="Eliminar" data-bs-toggle="tooltip">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(pacientes)}">
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="bi bi-inbox fs-3 text-muted"></i>
+                                    <p class="text-muted mt-2">No hay pacientes registrados</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Resumen -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card p-3 text-center">
+                        <h6 class="text-muted">Total Pacientes</h6>
+                        <h3 class="text-primary" th:text="${#lists.size(pacientes)}">0</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 text-center">
+                        <h6 class="text-muted">Activos</h6>
+                        <h3 class="text-success" id="countActivos">0</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 text-center">
+                        <h6 class="text-muted">Inactivos</h6>
+                        <h3 class="text-warning" id="countInactivos">0</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 text-center">
+                        <h6 class="text-muted">Suspendidos</h6>
+                        <h3 class="text-danger" id="countSuspendidos">0</h3>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    const filtroEmpresa = document.getElementById('filtroEmpresa');
+    const filtroEstado = document.getElementById('filtroEstado');
+    const buscarDNI = document.getElementById('buscarDNI');
+    const btnBuscar = document.getElementById('btnBuscar');
+    const tablaPacientes = document.getElementById('tablaPacientes');
+
+    // Función para actualizar contadores
+    function actualizarContadores() {
+        const filas = tablaPacientes.querySelectorAll('tr:not(.hide)');
+        let activos = 0, inactivos = 0, suspendidos = 0;
+        
+        filas.forEach(fila => {
+            const estado = fila.cells[4]?.textContent.trim();
+            if (estado === 'Activo') activos++;
+            else if (estado === 'Inactivo') inactivos++;
+            else if (estado === 'Suspendido') suspendidos++;
+        });
+        
+        document.getElementById('countActivos').textContent = activos;
+        document.getElementById('countInactivos').textContent = inactivos;
+        document.getElementById('countSuspendidos').textContent = suspendidos;
+    }
+
+    // Función para filtrar pacientes
+    function filtrarPacientes() {
+        const empresa = filtroEmpresa.value.toLowerCase();
+        const estado = filtroEstado.value.toLowerCase();
+        const dni = buscarDNI.value.toLowerCase();
+
+        const filas = tablaPacientes.querySelectorAll('tr');
+        let hayResultados = false;
+
+        filas.forEach(fila => {
+            if (fila.cells.length === 6) {
+                const filaEmpresa = fila.cells[2].textContent.toLowerCase();
+                const filaEstado = fila.cells[4].textContent.trim().toLowerCase();
+                const filaDNI = fila.cells[0].textContent.toLowerCase();
+
+                const cumpleEmpresa = !empresa || filaEmpresa.includes(empresa);
+                const cumpleEstado = !estado || filaEstado.includes(estado);
+                const cumpleDNI = !dni || filaDNI === dni;
+
+                if (cumpleEmpresa && cumpleEstado && cumpleDNI) {
+                    fila.style.display = '';
+                    hayResultados = true;
+                } else {
+                    fila.style.display = 'none';
+                }
+            }
+        });
+
+        // Mostrar mensaje si no hay resultados
+        if (!hayResultados && filas.length > 0) {
+            // Mantener el mensaje de "No hay pacientes"
+        }
+        
+        actualizarContadores();
+    }
+
+    // Event listeners
+    filtroEmpresa.addEventListener('change', filtrarPacientes);
+    filtroEstado.addEventListener('change', filtrarPacientes);
+    btnBuscar.addEventListener('click', filtrarPacientes);
+    buscarDNI.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') filtrarPacientes();
+    });
+
+    // Inicializar contadores al cargar
+    actualizarContadores();
+</script>
+</body>
+</html>

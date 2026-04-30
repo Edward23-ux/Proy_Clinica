@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Ocupacional - Chiclayo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+        .sidebar { min-height: 100vh; background: #212529; color: white; }
+        .nav-link { color: rgba(255,255,255,.75); transition: 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #fff; background: #343a40; border-radius: 8px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-primary { background-color: #0d6efd; border: none; border-radius: 8px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3">
+            <div class="d-flex align-items-center mb-4 px-2">
+                <i class="bi bi-hospital fs-3 me-2 text-primary"></i>
+                <span class="fs-5 fw-bold">Clínica Vial</span>
+            </div>
+            <ul class="nav flex-column gap-2">
+                <li class="nav-item"><a class="nav-link" href="/pacientes/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/pacientes/registro"><i class="bi bi-person-plus me-2"></i> Registro</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-medical me-2"></i> Atenciones</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-bar-graph me-2"></i> Reportes</a></li>
+            </ul>
+        </nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Registro de Paciente</h1>
+            </div>
+
+            <div class="card p-4">
+                <form th:action="@{/pacientes/guardar}" th:object="${paciente}" method="post" class="needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">DNI del Trabajador</label>
+                            <input type="text" class="form-control" th:field="*{dni}" placeholder="8 dígitos" required pattern="\d{8}">
+                            <div class="invalid-feedback">Ingrese un DNI válido de 8 dígitos.</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Nombres</label>
+                            <input type="text" class="form-control" th:field="*{nombres}" placeholder="Ej. Juan" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Apellidos</label>
+                            <input type="text" class="form-control" th:field="*{apellidos}" placeholder="Ej. Pérez García" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Empresa Solicitante</label>
+                            <select class="form-select" th:field="*{empresa}" required>
+                                <option value="" selected disabled>Seleccionar empresa...</option>
+                                <option value="Constructora Norte">Constructora Norte</option>
+                                <option value="Transportes Chiclayo">Transportes Chiclayo</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Estado</label>
+                            <select class="form-select" th:field="*{estado}" required>
+                                <option value="" selected disabled>Seleccionar estado...</option>
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                                <option value="Suspendido">Suspendido</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Tipo de Examen (EMO)</label>
+                            <div class="d-flex gap-3 mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" th:field="*{tipoExamen}" id="pre" value="PRE-OCUPACIONAL" checked>
+                                    <label class="form-check-label" for="pre">Pre-ocupacional</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" th:field="*{tipoExamen}" type="radio" id="per" value="PERIÓDICO">
+                                    <label class="form-check-label" for="per">Periódico</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <button class="btn btn-primary w-100 py-2 fs-6 fw-bold" type="submit">
+                        <i class="bi bi-save me-2"></i> Registrar Ingreso
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Script básico de validación de Bootstrap
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+</body>
+</html>
